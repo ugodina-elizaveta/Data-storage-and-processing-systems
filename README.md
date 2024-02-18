@@ -1,126 +1,84 @@
 # Data-storage-and-processing-systems
-## Hw1
-### Скрипт для отрисовки структуры базы данных в редакторе:
-Table store {
-  transaction_id integer [primary key]
-  transaction_date timestamp
-  online_order bool
-  order_status varchar 
-  list_price float
-  product_id integer
-  customer_id integer
-}
+## Hw2
+1.
+ ![1](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/1f359071-438d-4377-b25f-9040486c6e36)
 
-Table product {
-  product_id integer [primary key]
-  brand varchar
-  product_line varchar
-  product_class varchar
-  product_size varchar
-  standart_cost float
-}
+2.
+ ![2](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/e04e02f5-5236-48ad-ae06-1ca244a0fd9b)
 
-Table customer {
-  customer_id integer [primary key]
-  first_name varchar
-  last_name varchar
-  gender varchar
-  DOB timestamp
-  job_title varchar
-  job_industry_category varchar
-  wealth_segment varchar
-  deceased_indicator varchar
-  owns_car varchar
-  address varchar
-  postcode integer
-  state varchar
-  country varchar
-  property_valuation integer
+3.
+ ![3](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/38736624-7f21-43c5-95fb-59e3296cd09d)
 
-}
+4.
+ ![4](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/d6b544b6-4794-4803-b60a-add3f6149e8d)
 
-Ref: store.product_id > product.product_id
-Ref: store.customer_id > customer.customer_id
+5.
+ ![5](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/7c07d7f6-c746-4833-a651-d069ed3b56c7)
 
-![1](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/4505d591-1cf1-4e16-a0af-9c4bfdf0b708)
- 
-### Норамализация базы данных:
-Таблица store:
-*	1НФ: Первичный ключ transaction_id и нет повторяющихся столбцов или групп столбцов.
-*	2НФ: Нет неполностей в зависимостях от первичного ключа, так как все атрибуты зависят только от первичного ключа.
-*	3НФ: Нет транзитивных зависимостей, так как все атрибуты зависят только от первичного ключа.
-  
-Таблица product:
-*	1НФ: Первичный ключ product_id и нет повторяющихся столбцов или групп столбцов.
-*	2НФ: Нет неполностей в зависимостях от первичного ключа, так как все атрибуты зависят только от первичного ключа.
-*	3НФ: Нет транзитивных зависимостей, так как все атрибуты зависят только от первичного ключа
-  
-Таблица customer:
-*	1НФ: Первичный ключ customer_id и нет повторяющихся столбцов или групп столбцов.
-*	2НФ: Нет неполностей в зависимостях от первичного ключа, так как все атрибуты зависят только от первичного ключа.
-*	3НФ: Нет транзитивных зависимостей, так как все атрибуты зависят только от первичного ключа.
+6.
+ ![6](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/f3410298-7a57-4dca-8f05-de98bd402723)
+
+7.
+ ![7](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/495111a4-6100-46c3-bdc9-6e3d6637ead3)
+
+8.
+ ![8](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/8ff0fbac-b5f9-47c1-9079-38a6b3aa2d24)
 
 
-### Скрипт из DBeaver:
-CREATE TABLE store (
-  transaction_id INTEGER PRIMARY KEY,
-  transaction_date TIMESTAMP,
-  online_order BOOLEAN,
-  order_status VARCHAR,
-  list_price FLOAT,
-  product_id INTEGER,
-  customer_id INTEGER
-);
 
-CREATE TABLE product (
-  product_id INTEGER PRIMARY KEY,
-  brand VARCHAR,
-  product_line VARCHAR,
-  product_class VARCHAR,
-  product_size VARCHAR,
-  standard_cost FLOAT
-);
+## Sql-скрипт:
+-- 1. Вывести все уникальные бренды, у которых стандартная стоимость выше 1500 долларов
+SELECT DISTINCT brand
+FROM transaction
+WHERE standard_cost > 1500;
 
-CREATE TABLE customer (
-  customer_id INTEGER PRIMARY KEY,
-  first_name VARCHAR,
-  last_name VARCHAR,
-  gender VARCHAR,
-  DOB TIMESTAMP,
-  job_title VARCHAR,
-  job_industry_category VARCHAR,
-  wealth_segment VARCHAR,
-  deceased_indicator VARCHAR,
-  owns_car VARCHAR,
-  address VARCHAR,
-  postcode INTEGER,
-  state VARCHAR,
-  country VARCHAR,
-  property_valuation INTEGER
-);
+-- 2. Вывести все подтвержденные транзакции за период '2017-04-01' по '2017-04-09' включительно
+SELECT *
+FROM transaction
+WHERE order_status = 'Approved'
+AND transaction_date BETWEEN '2017-04-01' AND '2017-04-09';
 
-INSERT INTO store (transaction_id, transaction_date, online_order, order_status, list_price, product_id, customer_id) VALUES
-(1, '25.02.2017', false, 'Approved', 71.49, 2, 2950),
-(2, '21.05.2017', true, 'Approved', 2091.47, 3, 3120),
-(3, '16.10.2017', false, 'Approved', 1793.43, 37, 402);
+-- 3. Вывести все профессии у клиентов из сферы IT или Financial Services, которые начинаются с фразы 'Senior'
+SELECT job_title
+FROM customer
+WHERE (job_industry_category = 'IT' OR job_industry_category = 'Financial Services')
+AND job_title LIKE 'Senior%';
 
+-- 4. Вывести все бренды, которые закупают клиенты, работающие в сфере Financial Services
+SELECT DISTINCT t.brand
+FROM transaction t
+JOIN customer c ON t.customer_id = c.customer_id
+WHERE c.job_industry_category = 'Financial Services';
 
-INSERT INTO product (product_id, brand, product_line, product_class, product_size, standard_cost) VALUES
-(2, 'Solex', 'Standard', 'medium', 'medium', 53.62),
-(3, 'Trek Bicycles', 'Standard', 'medium', 'large', 388.92),
-(37, 'OHM Cycles', 'Standard', 'low', 'medium', 248.82);
+-- 5. Вывести 10 клиентов, которые оформили онлайн-заказ продукции из брендов 'Giant Bicycles', 'Norco Bicycles', 'Trek Bicycles'
+SELECT c.*
+FROM customer c
+JOIN transaction t ON c.customer_id = t.customer_id
+WHERE t.brand IN ('Giant Bicycles', 'Norco Bicycles', 'Trek Bicycles')
+ORDER BY t.transaction_date DESC
+LIMIT 10;
 
-INSERT INTO customer (customer_id, first_name, last_name, gender, DOB, job_title, job_industry_category, wealth_segment, deceased_indicator, owns_car, address, postcode, state, country, property_valuation) VALUES
-(2950, 'Laraine', 'Medendorp', 'F', '1953-10-12', 'Executive Secretary', 'Health', 'Mass Customer', 'N', 'Yes', '060 Morning Avenue', 2016, 'New South Wales', 'Australia', 10),
-(3120, 'Eli', 'Bockman', 'Male', '1980-12-16', 'Administrative Officer', 'Financial Services', 'Mass Customer', 'N', 'Yes', '6 Meadow Vale Court', 2153, 'New South Wales', 'Australia', 10),
-(402, 'Arlin', 'Dearle', 'Male', '1954-01-20', 'Recruiting Manager', 'Property', 'Mass Customer', 'N', 'Yes', '0 Holy Cross Court', 4211, 'QLD', 'Australia', 9);
+-- 6. Вывести всех клиентов, у которых нет транзакций
+SELECT *
+FROM customer
+WHERE customer_id NOT IN (SELECT DISTINCT customer_id FROM transaction);
 
-* Таблица customer:
-![customer](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/cf7acb6b-9e6a-4008-9c3d-4c18d747a2bd)
+-- 7. Вывести всех клиентов из IT, у которых транзакции с максимальной стандартной стоимостью
+WITH max_cost AS (
+    SELECT customer_id, MAX(standard_cost) AS max_cost
+    FROM transaction
+    GROUP BY customer_id
+)
+SELECT c.*
+FROM customer c
+JOIN transaction t ON c.customer_id = t.customer_id
+JOIN max_cost mc ON t.customer_id = mc.customer_id AND t.standard_cost = mc.max_cost
+WHERE c.job_industry_category = 'IT';
 
- 
-* Таблица product:
-![product](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/10fa4e25-5036-45dd-ab33-a786afcb1abf)
- 
-* Таблица store:
-![store](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/79e54ae3-6e2f-403f-bfd1-527e8e547769)
+-- 8. Вывести всех клиентов из сферы IT и Health, у которых есть подтвержденные транзакции за период '2017-07-07' по '2017-07-17'
+SELECT c.*
+FROM customer c
+JOIN transaction t ON c.customer_id = t.customer_id
+WHERE c.job_industry_category IN ('IT', 'Health')
+AND order_status = 'Approved'
+AND t.transaction_date BETWEEN '2017-07-07' AND '2017-07-17';
