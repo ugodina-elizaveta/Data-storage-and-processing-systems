@@ -24,7 +24,7 @@
 7.
 ![7](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/2f681ed6-5321-4bdf-a519-40f37b4919a6)
 
-
+## SQL-скрипт:
 -- 1.Вывести распределение (количество) клиентов по сферам деятельности, отсортировав результат по убыванию количества:
 SELECT job_industry_category, COUNT(customer_id) AS customer_count
 FROM customer
