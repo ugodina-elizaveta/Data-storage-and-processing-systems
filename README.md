@@ -1,84 +1,116 @@
 # Data-storage-and-processing-systems
-## Hw2
+## Hw3
 1.
- ![1](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/1f359071-438d-4377-b25f-9040486c6e36)
+![1](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/f2dd0f8a-14d2-4f18-bf7e-b477b6b1c6c7)
 
 2.
- ![2](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/e04e02f5-5236-48ad-ae06-1ca244a0fd9b)
+![2](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/033db3fa-8e64-4305-8fa1-659f8f7bde1e)
 
 3.
- ![3](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/38736624-7f21-43c5-95fb-59e3296cd09d)
+![3](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/c7309ce4-c50d-4197-9644-20f2756c2b85)
 
 4.
- ![4](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/d6b544b6-4794-4803-b60a-add3f6149e8d)
+![4_1](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/0f6b7a34-3849-43e7-a67b-087dcac0a9c8)
+![4_2](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/47a23a18-822a-4460-a5d5-1efd7356397c)
 
 5.
- ![5](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/7c07d7f6-c746-4833-a651-d069ed3b56c7)
+![5_1](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/bbc19942-16f1-4829-878d-4adc015eefc7)
+![5_2](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/0344b953-cf69-4b6d-a3f9-7bd77d4700f3)
+
 
 6.
- ![6](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/f3410298-7a57-4dca-8f05-de98bd402723)
+![6](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/3c8abd12-b92a-4bb9-a895-a16a25fb4dba)
 
 7.
- ![7](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/495111a4-6100-46c3-bdc9-6e3d6637ead3)
-
-8.
- ![8](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/8ff0fbac-b5f9-47c1-9079-38a6b3aa2d24)
+![7](https://github.com/ugodina-elizaveta/Data-storage-and-processing-systems/assets/108820578/2f681ed6-5321-4bdf-a519-40f37b4919a6)
 
 
-
-## Sql-скрипт:
--- 1. Вывести все уникальные бренды, у которых стандартная стоимость выше 1500 долларов
-SELECT DISTINCT brand
-FROM transaction
-WHERE standard_cost > 1500;
-
--- 2. Вывести все подтвержденные транзакции за период '2017-04-01' по '2017-04-09' включительно
-SELECT *
-FROM transaction
-WHERE order_status = 'Approved'
-AND transaction_date BETWEEN '2017-04-01' AND '2017-04-09';
-
--- 3. Вывести все профессии у клиентов из сферы IT или Financial Services, которые начинаются с фразы 'Senior'
-SELECT job_title
+-- 1.Вывести распределение (количество) клиентов по сферам деятельности, отсортировав результат по убыванию количества:
+SELECT job_industry_category, COUNT(customer_id) AS customer_count
 FROM customer
-WHERE (job_industry_category = 'IT' OR job_industry_category = 'Financial Services')
-AND job_title LIKE 'Senior%';
+GROUP BY job_industry_category
+ORDER BY customer_count DESC;
 
--- 4. Вывести все бренды, которые закупают клиенты, работающие в сфере Financial Services
-SELECT DISTINCT t.brand
+-- 2.Найти сумму транзакций за каждый месяц по сферам деятельности, отсортировав по месяцам и по сфере деятельности:
+SELECT EXTRACT(MONTH FROM t.transaction_date) AS month,
+       c.job_industry_category,
+       SUM(t.list_price) AS total_transactions
 FROM transaction t
 JOIN customer c ON t.customer_id = c.customer_id
-WHERE c.job_industry_category = 'Financial Services';
+GROUP BY month, c.job_industry_category
+ORDER BY month, total_transactions DESC;
 
--- 5. Вывести 10 клиентов, которые оформили онлайн-заказ продукции из брендов 'Giant Bicycles', 'Norco Bicycles', 'Trek Bicycles'
-SELECT c.*
+-- 3.Вывести количество онлайн-заказов для всех брендов в рамках подтвержденных заказов клиентов из сферы IT:
+SELECT brand, COUNT(online_order) AS online_orders_count
+FROM transaction t
+JOIN customer c ON t.customer_id = c.customer_id
+WHERE c.job_industry_category = 'IT' AND t.order_status = 'Approved'
+GROUP BY brand;
+
+-- 4.Найти по всем клиентам сумму всех транзакций (list_price), максимум, минимум и количество транзакций, отсортировав результат по убыванию суммы транзакций и количества клиентов.
+
+--Используя только GROUP BY:
+SELECT customer_id,
+       SUM(list_price) AS total_transactions,
+       MAX(list_price) AS max_transaction,
+       MIN(list_price) AS min_transaction,
+       COUNT(transaction_id) AS total_transactions_count
+FROM transaction
+GROUP BY customer_id
+ORDER BY total_transactions DESC, total_transactions_count DESC;
+
+-- Используя только оконные функции:
+SELECT customer_id,
+       SUM(list_price) OVER (PARTITION BY customer_id) AS total_transactions,
+       MAX(list_price) OVER (PARTITION BY customer_id) AS max_transaction,
+       MIN(list_price) OVER (PARTITION BY customer_id) AS min_transaction,
+       COUNT(transaction_id) OVER (PARTITION BY customer_id) AS total_transactions_count
+FROM transaction
+ORDER BY total_transactions DESC, total_transactions_count DESC;
+
+-- 5.Найти имена и фамилии клиентов с минимальной/максимальной суммой транзакций за весь период:
+-- Для минимальной суммы транзакций:
+SELECT c.first_name, c.last_name
 FROM customer c
 JOIN transaction t ON c.customer_id = t.customer_id
-WHERE t.brand IN ('Giant Bicycles', 'Norco Bicycles', 'Trek Bicycles')
-ORDER BY t.transaction_date DESC
-LIMIT 10;
-
--- 6. Вывести всех клиентов, у которых нет транзакций
-SELECT *
-FROM customer
-WHERE customer_id NOT IN (SELECT DISTINCT customer_id FROM transaction);
-
--- 7. Вывести всех клиентов из IT, у которых транзакции с максимальной стандартной стоимостью
-WITH max_cost AS (
-    SELECT customer_id, MAX(standard_cost) AS max_cost
+GROUP BY c.customer_id, c.first_name, c.last_name
+HAVING SUM(t.list_price) = (SELECT MIN(total_transactions) FROM 
+    (SELECT customer_id, SUM(list_price) as total_transactions
     FROM transaction
-    GROUP BY customer_id
-)
-SELECT c.*
-FROM customer c
-JOIN transaction t ON c.customer_id = t.customer_id
-JOIN max_cost mc ON t.customer_id = mc.customer_id AND t.standard_cost = mc.max_cost
-WHERE c.job_industry_category = 'IT';
+    GROUP BY customer_id) as total
+);
 
--- 8. Вывести всех клиентов из сферы IT и Health, у которых есть подтвержденные транзакции за период '2017-07-07' по '2017-07-17'
-SELECT c.*
+-- Для максимальной суммы транзакций: 
+SELECT c.first_name, c.last_name
 FROM customer c
 JOIN transaction t ON c.customer_id = t.customer_id
-WHERE c.job_industry_category IN ('IT', 'Health')
-AND order_status = 'Approved'
-AND t.transaction_date BETWEEN '2017-07-07' AND '2017-07-17';
+GROUP BY c.customer_id, c.first_name, c.last_name
+HAVING SUM(t.list_price) = (SELECT MAX(total_transactions) FROM 
+    (SELECT customer_id, SUM(list_price) as total_transactions
+    FROM transaction
+    GROUP BY customer_id) as total
+);
+
+-- 6.Вывести только самые первые транзакции клиентов с помощью оконных функций:
+WITH ranked_transactions AS (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY transaction_date) AS rn
+    FROM transaction
+)
+SELECT *
+FROM ranked_transactions
+WHERE rn = 1;
+
+-- 7.Вывести имена, фамилии и профессии клиентов, между транзакциями которых был максимальный интервал (интервал вычисляется в днях):
+WITH t2 AS (
+  SELECT customer_id, MAX(EXTRACT(DAY FROM transaction_date - CAST(LaggedTransactionDate AS TIMESTAMP))) AS MaxInterval
+  FROM (
+    SELECT customer_id, transaction_date, LAG(transaction_date) OVER (PARTITION BY customer_id ORDER BY transaction_date) AS LaggedTransactionDate
+    FROM transaction
+  ) t
+  GROUP BY customer_id
+)
+SELECT c.first_name, c.last_name, c.job_title
+FROM customer c
+JOIN t2 ON c.customer_id = t2.customer_id
+WHERE t2.MaxInterval = (SELECT MAX(MaxInterval) FROM t2)
